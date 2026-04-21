@@ -8,6 +8,6 @@ This project is currently under active development. Features and documentation a
 
 ## Timeline
 
-- **Expected completion:** April 22, 2026 (1 week)
+- **Expected completion:** May 21, 2026 (1 month)
 
 Work is ongoing and the project will be fully ready by the date above.
