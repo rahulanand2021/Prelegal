@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Mutual Non-Disclosure Agreement",
+    "description": "Standard terms for a mutual NDA allowing two parties to share confidential information for the purpose of evaluating a potential business relationship. Covers use restrictions, exceptions, term, and return of confidential information.",
+    "filename": "templates/Mutual-NDA.md"
+  },
+  {
+    "name": "Mutual Non-Disclosure Agreement Cover Page",
+    "description": "Cover page template for completing and executing the Mutual NDA standard terms. Parties fill in the Purpose, Effective Date, MNDA Term, Term of Confidentiality, and Governing Law before signing.",
+    "filename": "templates/Mutual-NDA-coverpage.md"
+  },
+  {
+    "name": "Cloud Service Agreement",
+    "description": "Comprehensive standard terms for a SaaS/cloud service agreement between a provider and customer. Covers access and use rights, restrictions, privacy and security, payment, term, warranties, limitation of liability, indemnification, and confidentiality.",
+    "filename": "templates/CSA.md"
+  },
+  {
+    "name": "Design Partner Agreement",
+    "description": "Standard terms for an early-access design partner program where a partner receives early product access in exchange for providing structured feedback to help the provider develop and improve the product.",
+    "filename": "templates/design-partner-agreement.md"
+  },
+  {
+    "name": "Service Level Agreement",
+    "description": "Standard terms for a service level agreement specifying uptime targets, response time commitments, service credit calculations, and remedies including termination rights for sustained underperformance.",
+    "filename": "templates/sla.md"
+  },
+  {
+    "name": "Professional Services Agreement",
+    "description": "Standard terms for a professional services engagement covering services delivery, deliverable acceptance, intellectual property ownership and assignment, payment, confidentiality, insurance, and indemnification.",
+    "filename": "templates/psa.md"
+  },
+  {
+    "name": "Data Processing Agreement",
+    "description": "Standard terms for a GDPR and UK GDPR-compliant data processing agreement. Covers processor and subprocessor obligations, restricted international transfers (including EEA SCCs and UK Addendum), security incident response, and audit rights.",
+    "filename": "templates/DPA.md"
+  },
+  {
+    "name": "Software License Agreement",
+    "description": "Standard terms for an on-premise software license agreement. Covers the license grant, usage restrictions, open source software, updates, payment, warranties, limitation of liability, indemnification, and confidentiality.",
+    "filename": "templates/Software-License-Agreement.md"
+  },
+  {
+    "name": "Partnership Agreement",
+    "description": "Standard terms for a business partnership agreement covering mutual obligations, trademark licensing between partners, payment, escalation procedures, confidentiality, indemnification, and limitation of liability.",
+    "filename": "templates/Partnership-Agreement.md"
+  },
+  {
+    "name": "Pilot Agreement",
+    "description": "Standard terms for a time-limited pilot or proof-of-concept engagement allowing a customer to evaluate a product before committing to a long-term agreement. Covers access rights, restrictions, disclaimers, and confidentiality.",
+    "filename": "templates/Pilot-Agreement.md"
+  },
+  {
+    "name": "Business Associate Agreement",
+    "description": "Standard HIPAA-compliant business associate agreement governing the handling of Protected Health Information (PHI) by a service provider acting as a business associate. Covers permitted uses, safeguards, subcontractors, breach notification, and term.",
+    "filename": "templates/BAA.md"
+  },
+  {
+    "name": "AI Addendum",
+    "description": "Standard addendum for agreements involving AI and machine learning services. Covers permitted uses of AI services, restrictions, model training permissions, IP ownership of inputs and outputs, and disclaimers about the nature of AI-generated content.",
+    "filename": "templates/AI-Addendum.md"
+  }
+]
