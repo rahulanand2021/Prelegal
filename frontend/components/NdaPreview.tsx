@@ -40,10 +40,10 @@ function CheckRow({ checked, label }: { checked: boolean; label: string }) {
 
 function Section({ title, label, children }: { title: string; label?: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginTop: '16px', borderTop: '1px solid #e5e7eb', paddingTop: '12px' }}>
-      <h3 style={{ fontSize: '12px', fontWeight: 700, marginBottom: label ? '2px' : '8px' }}>{title}</h3>
+    <div style={{ marginTop: '10px', borderTop: '1px solid #e5e7eb', paddingTop: '8px' }}>
+      <h3 style={{ fontSize: '12px', fontWeight: 700, marginBottom: label ? '2px' : '6px' }}>{title}</h3>
       {label && (
-        <p style={{ fontSize: '10px', fontStyle: 'italic', color: '#6b7280', marginBottom: '6px' }}>{label}</p>
+        <p style={{ fontSize: '10px', fontStyle: 'italic', color: '#6b7280', marginBottom: '4px' }}>{label}</p>
       )}
       {children}
     </div>
@@ -97,13 +97,13 @@ export default function NdaPreview({ data }: Props) {
       <div className="overflow-hidden rounded-lg bg-white shadow-sm">
         <div
           id="nda-doc"
-          style={{ padding: '48px 56px', fontFamily: 'Georgia, "Times New Roman", serif', color: '#111827' }}
+          style={{ padding: '28px 48px', fontFamily: 'Georgia, "Times New Roman", serif', color: '#111827' }}
         >
           <h1 style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center', marginBottom: '0' }}>
             Mutual Non-Disclosure Agreement
           </h1>
 
-          <div style={{ marginTop: '24px' }}>
+          <div style={{ marginTop: '14px' }}>
             <h2 style={{ fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
               Using This Mutual Non-Disclosure Agreement
             </h2>
@@ -171,8 +171,11 @@ export default function NdaPreview({ data }: Props) {
             </p>
           </Section>
 
-          <div style={{ marginTop: '20px', borderTop: '1px solid #e5e7eb', paddingTop: '16px' }}>
-            <p style={{ fontSize: '12px', color: '#374151', marginBottom: '16px' }}>
+          <div
+            className="page-break"
+            style={{ pageBreakBefore: 'always', marginTop: '0', paddingTop: '28px' }}
+          >
+            <p style={{ fontSize: '12px', color: '#374151', marginBottom: '10px' }}>
               By signing this Cover Page, each party agrees to enter into this MNDA as of the Effective Date.
             </p>
 
@@ -190,9 +193,9 @@ export default function NdaPreview({ data }: Props) {
               </thead>
               <tbody>
                 <tr>
-                  <td style={{ padding: '6px 8px 6px 0', color: '#6b7280', verticalAlign: 'top', fontSize: '11px' }}>Signature</td>
-                  <td style={{ padding: '28px 10px 8px', border: '1px solid #e5e7eb' }} />
-                  <td style={{ padding: '28px 10px 8px', border: '1px solid #e5e7eb' }} />
+                  <td style={{ padding: '4px 8px 4px 0', color: '#6b7280', verticalAlign: 'top', fontSize: '11px' }}>Signature</td>
+                  <td style={{ padding: '22px 10px 6px', border: '1px solid #e5e7eb' }} />
+                  <td style={{ padding: '22px 10px 6px', border: '1px solid #e5e7eb' }} />
                 </tr>
                 {SIG_ROWS.map(row => {
                   const p1Raw = data.party1[row.key];
@@ -201,13 +204,13 @@ export default function NdaPreview({ data }: Props) {
                   const p2Value = row.isDate ? formatDate(p2Raw) : p2Raw;
                   return (
                     <tr key={row.label}>
-                      <td style={{ padding: '6px 8px 6px 0', color: '#6b7280', verticalAlign: 'top', fontSize: '11px' }}>
+                      <td style={{ padding: '4px 8px 4px 0', color: '#6b7280', verticalAlign: 'top', fontSize: '11px' }}>
                         {row.label}
                       </td>
-                      <td style={{ padding: '6px 10px', border: '1px solid #e5e7eb', verticalAlign: 'top', whiteSpace: 'pre-wrap' }}>
+                      <td style={{ padding: '4px 10px', border: '1px solid #e5e7eb', verticalAlign: 'top', whiteSpace: 'pre-wrap' }}>
                         <Blank value={p1Value} placeholder={row.label} />
                       </td>
-                      <td style={{ padding: '6px 10px', border: '1px solid #e5e7eb', verticalAlign: 'top', whiteSpace: 'pre-wrap' }}>
+                      <td style={{ padding: '4px 10px', border: '1px solid #e5e7eb', verticalAlign: 'top', whiteSpace: 'pre-wrap' }}>
                         <Blank value={p2Value} placeholder={row.label} />
                       </td>
                     </tr>
@@ -217,7 +220,7 @@ export default function NdaPreview({ data }: Props) {
             </table>
           </div>
 
-          <div style={{ marginTop: '32px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
+          <div style={{ marginTop: '28px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
             <p style={{ fontSize: '10px', color: '#9ca3af', textAlign: 'center' }}>
               Common Paper Mutual Non-Disclosure Agreement (Version 1.0) free to use under CC BY 4.0.
             </p>
