@@ -20,9 +20,9 @@ When instructed to build a feature:
 
 ## AI design
 
-When writing code to make calls to LLMs, use your Cerebras skill to use LiteLLM via OpenRouter to the `openrouter/openai/gpt-oss-120b` model with Cerebras as the inference provider. You should use Structured Outputs so that you can interpret the results and populate fields in the legal document.
+When writing code to make calls to LLMs, use your Cerebras skill to call LLM via OpenAI SDK to the `gpt-5` model with OPENAI as the inference provider. You should use Structured Outputs so that you can interpret the results and populate fields in the legal document.
 
-There is an OPENROUTER_API_KEY in the .env file in the project root.
+There is an OPENAI_API_KEY in the .env file in the project root.
 
 ## Technical design
 
@@ -32,6 +32,7 @@ The frontend should be in frontend/
 The database should use SQLLite and be created from scratch each time the Docker container is brought up, allowing for a users table with sign up and sign in.  
 Consider statically building the frontend and serving it via FastAPI, if that will work.  
 There should be scripts in scripts/ for:  
+
 ```bash
 # Mac
 scripts/start-mac.sh    # Start
