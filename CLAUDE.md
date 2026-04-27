@@ -20,7 +20,7 @@ When instructed to build a feature:
 
 ## AI design
 
-When writing code to make calls to LLMs, use your Cerebras skill to call LLM via OpenAI SDK to the `gpt-5` model with OPENAI as the inference provider. You should use Structured Outputs so that you can interpret the results and populate fields in the legal document.
+When writing code to make calls to LLMs, use your cerebras skill to call LLM via OpenAI SDK to the `gpt-5` model with OPENAI as the inference provider. You should use Structured Outputs so that you can interpret the results and populate fields in the legal document.
 
 There is an OPENAI_API_KEY in the .env file in the project root.
 
