@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import NdaForm from '@/components/NdaForm';
+import NdaChat from '@/components/NdaChat';
 import NdaPreview from '@/components/NdaPreview';
 import { NdaFormData, defaultFormData } from '@/lib/types';
 
@@ -23,8 +23,8 @@ export default function PlatformPage() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      <div className="w-2/5 min-w-80 overflow-y-auto border-r border-gray-200 bg-white shadow-sm">
-        <NdaForm data={formData} onChange={setFormData} />
+      <div className="w-2/5 min-w-80 flex flex-col border-r border-gray-200 bg-white shadow-sm">
+        <NdaChat data={formData} onChange={setFormData} />
       </div>
       <div className="flex-1 overflow-y-auto bg-gray-100 p-8">
         <NdaPreview data={formData} />
