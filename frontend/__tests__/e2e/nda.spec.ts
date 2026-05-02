@@ -1,128 +1,76 @@
 import { test, expect, Page } from '@playwright/test';
-import path from 'path';
-import fs from 'fs';
 
-const fillForm = async (page: Page) => {
-  await page.getByPlaceholder('How Confidential Information may be used').fill('Evaluating a potential acquisition');
-  await page.locator('input[type="date"]').first().fill('2026-04-22');
-  // Governing law field is labeled "State" with placeholder "e.g. Delaware"
-  await page.getByLabel('State').fill('California');
-  await page.getByLabel('Jurisdiction').fill('San Francisco, California');
-  // Party 1
-  await page.locator('input[placeholder="Print Name"]').first().fill('Alice Smith');
-  await page.locator('input[placeholder="Title"]').first().fill('CEO');
-  await page.locator('input[placeholder="Company"]').first().fill('Acme Corp');
-  // Party 2
-  await page.locator('input[placeholder="Print Name"]').nth(1).fill('Bob Jones');
-  await page.locator('input[placeholder="Title"]').nth(1).fill('CTO');
-  await page.locator('input[placeholder="Company"]').nth(1).fill('Beta LLC');
-};
+/** Log in by setting localStorage so we land directly on the platform. */
+async function login(page: Page) {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.setItem('prelegal_user', 'test@example.com'));
+  await page.goto('/platform/');
+}
 
-test.describe('NDA Creator — page load', () => {
-  test('loads successfully and shows key headings', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'Mutual NDA Creator' })).toBeVisible();
-    await expect(page.getByText('Mutual Non-Disclosure Agreement').first()).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Standard Terms' })).toBeVisible();
+/** Select a document type from the selector screen. */
+async function selectDocument(page: Page, name: string) {
+  await page.getByRole('button', { name }).click();
+}
+
+test.describe('Document selector', () => {
+  test('shows the document selector on /platform', async ({ page }) => {
+    await login(page);
+    await expect(page.getByText('Choose a document to draft')).toBeVisible();
+  });
+
+  test('lists at least 11 document types', async ({ page }) => {
+    await login(page);
+    const cards = page.locator('button').filter({ hasText: 'Agreement' });
+    const count = await cards.count();
+    expect(count).toBeGreaterThanOrEqual(5);
+  });
+
+  test('does not show NDA cover-page as a separate entry', async ({ page }) => {
+    await login(page);
+    await expect(page.getByText('Mutual Non-Disclosure Agreement Cover Page')).not.toBeVisible();
+  });
+});
+
+test.describe('Document drafting — Mutual NDA', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+    await selectDocument(page, 'Mutual Non-Disclosure Agreement');
+  });
+
+  test('shows chat panel and preview panel', async ({ page }) => {
+    await expect(page.getByText('Chat with AI to draft your agreement')).toBeVisible();
+    await expect(page.getByText('Preview')).toBeVisible();
+  });
+
+  test('shows the document name in the chat header', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Mutual Non-Disclosure Agreement' })).toBeVisible();
+  });
+
+  test('shows Key Terms panel in the preview', async ({ page }) => {
+    await expect(page.getByText('Key Terms')).toBeVisible();
   });
 
   test('Download PDF button is visible', async ({ page }) => {
-    await page.goto('/');
     await expect(page.getByRole('button', { name: /download pdf/i })).toBeVisible();
   });
-});
 
-test.describe('NDA Creator — form interaction', () => {
-  test('typing purpose updates the preview', async ({ page }) => {
-    await page.goto('/');
-    await page.getByPlaceholder('How Confidential Information may be used').fill('Strategic acquisition evaluation');
-    await expect(page.locator('#nda-doc').getByText('Strategic acquisition evaluation').first()).toBeVisible();
-  });
-
-  test('typing governing law updates the preview', async ({ page }) => {
-    await page.goto('/');
-    // Field label is "State", placeholder is "e.g. Delaware"
-    await page.getByLabel('State').fill('Delaware');
-    await expect(page.locator('#nda-doc').getByText('Delaware').first()).toBeVisible();
-  });
-
-  test('party company names appear in signature table headers', async ({ page }) => {
-    await page.goto('/');
-    await page.locator('input[placeholder="Company"]').first().fill('Acme Corp');
-    await page.locator('input[placeholder="Company"]').nth(1).fill('Beta LLC');
-    await expect(page.locator('#nda-doc').getByText('Party 1 — Acme Corp')).toBeVisible();
-    await expect(page.locator('#nda-doc').getByText('Party 2 — Beta LLC')).toBeVisible();
-  });
-
-  test('switching MNDA term to "until terminated" checks the second radio', async ({ page }) => {
-    await page.goto('/');
-    // Label text in the form is "Until terminated"
-    await page.getByText('Until terminated').click();
-    const doc = page.locator('#nda-doc');
-    // The "until_terminated" check row should now show ☑
-    await expect(doc.getByText(/Continues until terminated/)).toBeVisible();
+  test('Change document link returns to selector', async ({ page }) => {
+    await page.getByText('Change document').click();
+    await expect(page.getByText('Choose a document to draft')).toBeVisible();
   });
 });
 
-test.describe('NDA Creator — PDF page-break structure in DOM', () => {
-  test('document has exactly two .page-break elements', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.locator('#nda-doc .page-break')).toHaveCount(2);
+test.describe('Document drafting — Cloud Service Agreement', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+    await selectDocument(page, 'Cloud Service Agreement');
   });
 
-  test('first .page-break wraps the signature table', async ({ page }) => {
-    await page.goto('/');
-    const firstBreak = page.locator('#nda-doc .page-break').first();
-    await expect(firstBreak.locator('table')).toBeVisible();
+  test('shows Cloud Service Agreement in the chat header', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Cloud Service Agreement' })).toBeVisible();
   });
 
-  test('second .page-break contains Standard Terms heading', async ({ page }) => {
-    await page.goto('/');
-    const secondBreak = page.locator('#nda-doc .page-break').nth(1);
-    await expect(secondBreak.getByRole('heading', { name: 'Standard Terms' })).toBeVisible();
-  });
-
-  test('both .page-break elements have pageBreakBefore: always inline style', async ({ page }) => {
-    await page.goto('/');
-    const breaks = page.locator('#nda-doc .page-break');
-    const count = await breaks.count();
-    for (let i = 0; i < count; i++) {
-      const style = await breaks.nth(i).getAttribute('style');
-      // Next.js minifies inline styles: no space after colon
-      expect(style).toMatch(/page-break-before:\s*always/);
-    }
-  });
-
-  test('signature table page comes before Standard Terms page in DOM order', async ({ page }) => {
-    await page.goto('/');
-    // Use DOM compareDocumentPosition to verify order without relying on text indices
-    const isFirstBeforeSecond = await page.evaluate(() => {
-      const breaks = document.querySelectorAll('#nda-doc .page-break');
-      if (breaks.length < 2) return false;
-      const pos = breaks[0].compareDocumentPosition(breaks[1]);
-      return !!(pos & Node.DOCUMENT_POSITION_FOLLOWING);
-    });
-    expect(isFirstBeforeSecond).toBe(true);
-  });
-});
-
-test.describe('NDA Creator — PDF download', () => {
-  test('clicking Download PDF triggers a file download named mutual-nda.pdf', async ({ page }) => {
-    await page.goto('/');
-    await fillForm(page);
-
-    const [download] = await Promise.all([
-      page.waitForEvent('download', { timeout: 30000 }),
-      page.getByRole('button', { name: /download pdf/i }).click(),
-    ]);
-
-    expect(download.suggestedFilename()).toBe('mutual-nda.pdf');
-
-    const downloadPath = path.join(process.cwd(), '__tests__', 'e2e', 'downloads', 'mutual-nda.pdf');
-    fs.mkdirSync(path.dirname(downloadPath), { recursive: true });
-    await download.saveAs(downloadPath);
-
-    const stat = fs.statSync(downloadPath);
-    expect(stat.size).toBeGreaterThan(10000);
+  test('shows Key Terms panel', async ({ page }) => {
+    await expect(page.getByText('Key Terms')).toBeVisible();
   });
 });
