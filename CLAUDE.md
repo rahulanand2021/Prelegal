@@ -8,7 +8,7 @@ The available documents are covered in the catalog.json file in the project root
 
 @catalog.json
 
-The current implementation has a working Docker-packaged foundation with a fake login screen and the Mutual NDA creator on the platform page. Full AI chat, multi-document support, real authentication, and document persistence are not yet implemented.
+The current implementation has a working Docker-packaged foundation with a fake login screen, AI chat, and support for all 12 document types. Real authentication and document persistence are not yet implemented.
 
 ## Development process
 
@@ -55,7 +55,7 @@ Backend available at http://localhost:8000
 - Dark Navy: `#032147` (headings)
 - Gray Text: `#888888`
 
-## Implementation Status (as of PL-4)
+## Implementation Status (as of PL-6)
 
 **Done:**
 - Docker multi-stage build: Node.js builds Next.js static export; Python/FastAPI serves it
@@ -73,7 +73,15 @@ Backend available at http://localhost:8000
 - Structured JSON response `{message, fields}` allows partial field updates per turn
 - Full conversation history sent each turn so the AI has context across the conversation
 
+**Done (PL-6):**
+- Document selector screen: grid of all 12 document types shown before drafting (`frontend/components/DocSelector.tsx`)
+- Generic AI chat (`frontend/components/DocChat.tsx`) replaces NDA-specific `NdaChat` — sends `document_type` to backend
+- Template-substituting preview (`frontend/components/DocPreview.tsx`): fetches markdown template, substitutes `<span class="*_link">Label</span>` spans with user-provided field values, renders full document with Key Terms panel and PDF download
+- Backend document registry (`backend/document_registry.py`): field schemas + AI system prompts for all 11 selectable doc types (NDA cover page merged into NDA entry)
+- `/api/template` endpoint: serves combined markdown template files with path-traversal protection
+- `frontend/lib/catalog.ts`: `CATALOG`, `DOCUMENT_FIELDS`, `CatalogEntry`, `FieldDef` types for frontend
+- Platform page updated to two-state flow: selector → chat+preview
+
 **Not yet done:**
 - Real authentication (password hashing, JWT/session tokens, DB lookup)
-- Support for document types beyond Mutual NDA
 - Document persistence (saving/loading drafted agreements)
