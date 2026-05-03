@@ -8,7 +8,7 @@ The available documents are covered in the catalog.json file in the project root
 
 @catalog.json
 
-The current implementation has a working Docker-packaged foundation with a fake login screen, AI chat, and support for all 12 document types. Real authentication and document persistence are not yet implemented.
+The current implementation has a working Docker-packaged foundation with real authentication, AI chat, document persistence, and support for all 12 document types.
 
 ## Development process
 
@@ -55,15 +55,12 @@ Backend available at http://localhost:8000
 - Dark Navy: `#032147` (headings)
 - Gray Text: `#888888`
 
-## Implementation Status (as of PL-6)
+## Implementation Status (as of PL-7)
 
 **Done:**
 - Docker multi-stage build: Node.js builds Next.js static export; Python/FastAPI serves it
 - `docker-compose.yml` and start/stop scripts for Mac, Linux, Windows
 - FastAPI backend (`backend/`) as a `uv` project; serves static frontend from `frontend/out/`
-- SQLite DB initialized on startup with a `users` table (email, created_at)
-- Login/signup UI at `/` — fake auth only (stores email in `localStorage`, no password validation)
-- Platform page at `/platform` — session-gated (redirects to `/` if no `localStorage` entry); currently shows Mutual NDA creator only
 - `/api/health` endpoint
 
 **Done (PL-5):**
@@ -82,6 +79,17 @@ Backend available at http://localhost:8000
 - `frontend/lib/catalog.ts`: `CATALOG`, `DOCUMENT_FIELDS`, `CatalogEntry`, `FieldDef` types for frontend
 - Platform page updated to two-state flow: selector → chat+preview
 
+**Done (PL-7):**
+- Real authentication: bcrypt password hashing, opaque session tokens in SQLite `sessions` table; `/api/auth/signup`, `/api/auth/signin`, `/api/auth/signout` endpoints (`backend/auth.py`)
+- SQLite schema expanded: `users` table now has `password_hash`; new `sessions` and `documents` tables
+- Document persistence: `/api/documents` CRUD with per-user ownership enforcement (`backend/documents.py`); DB resets on container restart
+- Auto-save: DocChat saves after every AI turn; manual Save button with "Saving…" / "Saved" indicator
+- My Documents tab: second tab on DocSelector lists saved drafts with last-updated date; clicking resumes the AI chat with fields pre-loaded and a context-aware greeting
+- Token stored in `localStorage` via `frontend/lib/auth.ts` helpers; all protected API calls send `Authorization: Bearer <token>`
+- UI polish: user email + Sign out in DocChat and DocSelector headers; error messages on login/signup; loading state on submit
+- Draft disclaimer: amber banner on every document preview ("AI-generated draft… reviewed by a qualified legal professional")
+- Bug fix: `.gitignore` `lib/` pattern was blocking `frontend/lib/` — added `!frontend/lib/` exemption and committed `catalog.ts`, `types.ts`
+
 **Not yet done:**
-- Real authentication (password hashing, JWT/session tokens, DB lookup)
-- Document persistence (saving/loading drafted agreements)
+- Session expiry (sessions currently live until container restart)
+- Document renaming (doc_name defaults to doc_type)
