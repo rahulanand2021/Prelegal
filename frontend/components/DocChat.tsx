@@ -3,12 +3,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { CatalogEntry } from '@/lib/catalog';
 import { DocumentData } from '@/lib/types';
+import { authHeaders } from '@/lib/auth';
 
 interface Props {
   document: CatalogEntry;
   data: DocumentData;
   onChange: (data: DocumentData) => void;
   onChangeDocument: () => void;
+  email: string;
+  onLogout: () => void;
+  initialDocId?: number | null;
 }
 
 interface Message {
@@ -29,15 +33,48 @@ function applyFields(current: DocumentData, fields: Record<string, unknown>): Do
   return next;
 }
 
-export default function DocChat({ document, data, onChange, onChangeDocument }: Props) {
+export default function DocChat({ document, data, onChange, onChangeDocument, email, onLogout, initialDocId }: Props) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const bottomRef = useRef<HTMLDivElement>(null);
   const dataRef = useRef(data);
   const apiHistoryRef = useRef<Message[]>([]);
   const initialized = useRef(false);
+  const docIdRef = useRef<number | null>(initialDocId ?? null);
+  const saveInFlightRef = useRef(false);
   dataRef.current = data;
+
+  const saveDoc = async (fields: DocumentData) => {
+    if (saveInFlightRef.current) return;
+    saveInFlightRef.current = true;
+    setSaveStatus('saving');
+    try {
+      const res = await fetch('/api/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({
+          doc_id: docIdRef.current,
+          doc_type: document.name,
+          doc_name: document.name,
+          fields,
+        }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        docIdRef.current = json.id;
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 2000);
+      } else {
+        setSaveStatus('idle');
+      }
+    } catch {
+      setSaveStatus('idle');
+    } finally {
+      saveInFlightRef.current = false;
+    }
+  };
 
   const callApi = async (newUserMsg?: Message) => {
     if (newUserMsg) {
@@ -47,7 +84,7 @@ export default function DocChat({ document, data, onChange, onChangeDocument }: 
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({
           messages: apiHistoryRef.current,
           current_data: dataRef.current,
@@ -60,7 +97,9 @@ export default function DocChat({ document, data, onChange, onChangeDocument }: 
       apiHistoryRef.current = [...apiHistoryRef.current, assistantMsg];
       setMessages(prev => [...prev, assistantMsg]);
       if (json.fields) {
-        onChange(applyFields(dataRef.current, json.fields as Record<string, unknown>));
+        const updated = applyFields(dataRef.current, json.fields as Record<string, unknown>);
+        onChange(updated);
+        saveDoc(updated);
       }
     } catch {
       setMessages(prev => [
@@ -77,7 +116,9 @@ export default function DocChat({ document, data, onChange, onChangeDocument }: 
     initialized.current = true;
     const initMsg: Message = {
       role: 'user',
-      content: `Hello, I need help drafting a ${document.name}.`,
+      content: initialDocId
+        ? `I'm resuming a previously saved draft of a ${document.name}. The fields already filled in are shown in the preview. Please continue helping me refine the document.`
+        : `Hello, I need help drafting a ${document.name}.`,
     };
     apiHistoryRef.current = [initMsg];
     callApi();
@@ -105,22 +146,48 @@ export default function DocChat({ document, data, onChange, onChangeDocument }: 
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-6 py-5 border-b border-gray-100">
-        <div className="mb-1 flex items-center justify-between">
+      <div className="px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: '#ecad0a' }} />
             <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">Prelegal</span>
           </div>
-          <button
-            onClick={onChangeDocument}
-            className="text-xs font-medium hover:underline"
-            style={{ color: '#209dd7' }}
-          >
-            Change document
-          </button>
+          <div className="flex items-center gap-2 text-xs">
+            <span className="truncate max-w-[130px]" style={{ color: '#888888' }}>{email}</span>
+            <span className="text-gray-300">·</span>
+            <button onClick={onLogout} className="hover:underline flex-shrink-0" style={{ color: '#888888' }}>
+              Sign out
+            </button>
+          </div>
         </div>
-        <h1 className="text-xl font-semibold" style={{ color: '#032147' }}>{document.name}</h1>
-        <p className="mt-0.5 text-sm" style={{ color: '#888888' }}>Chat with AI to draft your agreement</p>
+
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h1 className="text-xl font-semibold leading-snug" style={{ color: '#032147' }}>{document.name}</h1>
+            <p className="mt-0.5 text-sm" style={{ color: '#888888' }}>Chat with AI to draft your agreement</p>
+          </div>
+          <div className="flex items-center gap-2 text-xs flex-shrink-0 mt-1">
+            {saveStatus === 'saving' && <span style={{ color: '#888888' }}>Saving…</span>}
+            {saveStatus === 'saved' && <span style={{ color: '#209dd7' }}>Saved</span>}
+            {saveStatus === 'idle' && (
+              <button
+                onClick={() => saveDoc(dataRef.current)}
+                className="font-medium hover:underline"
+                style={{ color: '#209dd7' }}
+              >
+                Save
+              </button>
+            )}
+            <span className="text-gray-300">·</span>
+            <button
+              onClick={onChangeDocument}
+              className="font-medium hover:underline"
+              style={{ color: '#209dd7' }}
+            >
+              Change
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">

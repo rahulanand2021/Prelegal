@@ -6,7 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 import database
+from auth import router as auth_router
 from chat import ChatRequest, ChatResponse, get_ai_response
+from documents import router as documents_router
 
 load_dotenv(pathlib.Path(__file__).parent.parent / ".env")
 
@@ -20,6 +22,9 @@ app.add_middleware(
 )
 
 database.init()
+
+app.include_router(auth_router)
+app.include_router(documents_router)
 
 STATIC_DIR = pathlib.Path(__file__).parent.parent / "frontend" / "out"
 

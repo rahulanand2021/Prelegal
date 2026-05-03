@@ -176,6 +176,15 @@ export default function DocPreview({ document, data }: Props) {
         </button>
       </div>
 
+      <div className="mb-4 flex items-start gap-2.5 rounded-lg px-4 py-3" style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a' }}>
+        <svg className="mt-0.5 h-4 w-4 flex-shrink-0" style={{ color: '#d97706' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <p className="text-xs leading-relaxed" style={{ color: '#92400e' }}>
+          <strong className="font-semibold">Draft document.</strong> This is an AI-generated draft for reference only and should be reviewed by a qualified legal professional before use or execution.
+        </p>
+      </div>
+
       <div className="overflow-hidden rounded-lg bg-white shadow-sm">
         <div
           id="doc-preview-content"
