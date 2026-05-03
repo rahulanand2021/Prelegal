@@ -11,9 +11,11 @@ def get_conn() -> sqlite3.Connection:
 
 
 def init() -> None:
+    if DB_PATH.exists():
+        DB_PATH.unlink()
     conn = get_conn()
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS users (
+        CREATE TABLE users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
@@ -21,14 +23,14 @@ def init() -> None:
         )
     """)
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS sessions (
+        CREATE TABLE sessions (
             token TEXT PRIMARY KEY,
             user_id INTEGER NOT NULL REFERENCES users(id),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
     conn.execute("""
-        CREATE TABLE IF NOT EXISTS documents (
+        CREATE TABLE documents (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL REFERENCES users(id),
             doc_type TEXT NOT NULL,
