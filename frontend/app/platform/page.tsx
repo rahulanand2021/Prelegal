@@ -7,25 +7,42 @@ import DocChat from '@/components/DocChat';
 import DocPreview from '@/components/DocPreview';
 import { CatalogEntry } from '@/lib/catalog';
 import { DocumentData } from '@/lib/types';
+import { isAuthenticated, getEmail, clearAuth, authHeaders } from '@/lib/auth';
 
 export default function PlatformPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
+  const [email, setEmail] = useState('');
   const [selected, setSelected] = useState<CatalogEntry | null>(null);
   const [formData, setFormData] = useState<DocumentData>({});
+  const [docId, setDocId] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!localStorage.getItem('prelegal_user')) {
+    if (!isAuthenticated()) {
       router.push('/');
     } else {
+      setEmail(getEmail() || '');
       setReady(true);
     }
   }, [router]);
 
+  const handleLogout = async () => {
+    await fetch('/api/auth/signout', { method: 'POST', headers: authHeaders() });
+    clearAuth();
+    router.push('/');
+  };
+
   if (!ready) return null;
 
   if (!selected) {
-    return <DocSelector onSelect={(doc) => { setSelected(doc); setFormData({}); }} />;
+    return (
+      <DocSelector
+        email={email}
+        onLogout={handleLogout}
+        onSelect={(doc) => { setSelected(doc); setFormData({}); setDocId(null); }}
+        onOpenSaved={(doc, fields, id) => { setSelected(doc); setFormData(fields); setDocId(id); }}
+      />
+    );
   }
 
   return (
@@ -35,7 +52,10 @@ export default function PlatformPage() {
           document={selected}
           data={formData}
           onChange={setFormData}
-          onChangeDocument={() => setSelected(null)}
+          onChangeDocument={() => { setSelected(null); setDocId(null); }}
+          email={email}
+          onLogout={handleLogout}
+          initialDocId={docId}
         />
       </div>
       <div className="flex-1 overflow-y-auto bg-gray-100 p-8">
